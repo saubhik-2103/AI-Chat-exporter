@@ -1,0 +1,61 @@
+{
+  "manifest_version": 3,
+  "name": "AI Chat Exporter (S_LAB)",
+  "version": "1.1.0",
+  "description": "Export AI chats from Gemini, ChatGPT, DeepSeek, Claude, Le Chat & Qwen to beautifully formatted PDFs.",
+  "action": {
+    "default_title": "Open Exporter Dashboard",
+    "default_popup": "index.html",
+    "default_icon": {
+      "16": "logo1.png",
+      "32": "logo1.png",
+      "48": "logo1.png",
+      "128": "logo1.png"
+    }
+  },
+  "icons": {
+    "16": "logo1.png",
+    "32": "logo1.png",
+    "48": "logo1.png",
+    "128": "logo1.png"
+  },
+  "background": {
+    "service_worker": "src/background/service-worker.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://gemini.google.com/*",
+        "https://chatgpt.com/*",
+        "https://chat.deepseek.com/*",
+        "https://claude.ai/*",
+        "https://chat.mistral.ai/*",
+        "https://chat.qwen.ai/*"
+      ],
+      "js": ["src/content/index.js"]
+    }
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "tabs"
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["index.html", "assets/*"],
+      "matches": [
+        "https://gemini.google.com/*",
+        "https://chatgpt.com/*",
+        "https://chat.deepseek.com/*",
+        "https://claude.ai/*",
+        "https://chat.mistral.ai/*",
+        "https://chat.qwen.ai/*"
+      ]
+    }
+  ]
+}

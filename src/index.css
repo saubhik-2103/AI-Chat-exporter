@@ -1,0 +1,179 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: #F8F9FA;
+  color: #1a1d2e;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+input, select, textarea {
+  font-family: inherit;
+}
+
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 4px;
+  background: #e2e8f0;
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #3b5de7;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(59, 93, 231, 0.3);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #3b5de7;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 6px rgba(59, 93, 231, 0.3);
+}
+
+
+.gemini-content p { margin-bottom: 1rem; line-height: 1.6; }
+.gemini-content p:last-child { margin-bottom: 0; }
+.gemini-content ul { list-style-type: disc; margin-bottom: 1rem; padding-left: 1.5rem; }
+.gemini-content ol { list-style-type: decimal; margin-bottom: 1rem; padding-left: 1.5rem; }
+.gemini-content li { margin-bottom: 0.5rem; line-height: 1.6; }
+.gemini-content pre { padding: 1rem; border-radius: 0.5rem; margin: 1.5rem 0; overflow-x: auto; }
+.gemini-content code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.9em; }
+.gemini-content h1, .gemini-content h2, .gemini-content h3 { font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+.gemini-content h2 { font-size: 1.25rem; }
+.gemini-content table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+.gemini-content th, .gemini-content td { padding: 0.5rem 1rem; text-align: left; }
+
+/* ======== KaTeX compatibility with Tailwind ======== */
+
+/* 1. KaTeX computes sizes with content-box — Tailwind sets border-box on *.
+   Without this, KaTeX's width calculations are incorrect, causing overlap. */
+.katex,
+.katex * {
+  box-sizing: content-box !important;
+}
+
+/* 2. Tailwind sets a default border color (#e5e7eb) and solid style on *.
+   KaTeX relies on borders for fraction bars and sqrt lines. We need to
+   ensure they inherit the text color. */
+.katex * {
+  border-color: currentColor !important;
+}
+
+/* 3. Our custom markers for rendering */
+.math-tex {
+  display: inline;
+}
+
+.math-tex.math-display {
+  display: block;
+  text-align: center;
+  margin: 1em 0;
+  overflow-x: auto;
+}
+
+.dark-mode .gemini-content pre {
+  background-color: #1e1f20;
+  border: 1px solid #282a2c;
+}
+.light-mode .gemini-content pre {
+  background-color: #f1f5f9;
+  border: 1px solid #e2e8f0;
+}
+
+/* Neutralize inherited borders from scraped platform HTML (ChatGPT wraps
+   code blocks in extra divs that carry their own border/outline styles). */
+.gemini-content div {
+  border: none !important;
+  outline: none !important;
+}
+
+.dark-mode .gemini-content th, .dark-mode .gemini-content td {
+  border: 1px solid #444746;
+}
+.light-mode .gemini-content th, .light-mode .gemini-content td {
+  border: 1px solid #cbd5e1;
+}
+
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .gemini-content p, .gemini-content pre, .gemini-content li, .gemini-content table, .gemini-content img {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  .gemini-content pre, .gemini-content code {
+    white-space: pre-wrap !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    word-break: break-all !important;
+    overflow-x: hidden !important;
+  }
+  @page {
+    margin: 0;
+  }
+  html.dark-mode, body.dark-mode {
+    background-color: #131314 !important;
+  }
+  html.light-mode, body.light-mode {
+    background-color: #ffffff !important;
+  }
+  html, body {
+    margin: 0;
+  }
+}

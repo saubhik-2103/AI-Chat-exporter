@@ -1,0 +1,209 @@
+import React, { useState, useEffect } from 'react';
+
+const PLATFORM_LABELS = {
+  gemini: 'Gemini',
+  chatgpt: 'ChatGPT',
+  deepseek: 'DeepSeek',
+  claude: 'Claude',
+  lechat: 'Le Chat',
+  qwen: 'Qwen',
+};
+
+export default function PopupPanel() {
+  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [chatData, setChatData] = useState({ title: '', messages: [], platform: '' });
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [status, setStatus] = useState('idle');
+  const platformLabel = PLATFORM_LABELS[chatData.platform] || 'AI Chat';
+
+  useEffect(() => {
+    if (typeof chrome !== 'undefined' && chrome.storage) {
+
+        chrome.storage.local.get(['currentExportData', 'isDarkMode'], (result) => {
+        if (result.currentExportData) {
+          setChatData(result.currentExportData);
+        }
+        if (result.isDarkMode !== undefined) {
+          setIsDarkMode(result.isDarkMode);
+        }
+      });
+
+      const handleStorageChange = (changes, namespace) => {
+        if (namespace === 'local') {
+          if (changes.currentExportData?.newValue) {
+            setChatData(changes.currentExportData.newValue);
+          }
+          if (changes.isDarkMode?.newValue !== undefined) {
+            setIsDarkMode(changes.isDarkMode.newValue);
+          }
+        }
+      };
+
+      chrome.storage.onChanged.addListener(handleStorageChange);
+
+      return () => {
+        chrome.storage.onChanged.removeListener(handleStorageChange);
+      };
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const newVal = !isDarkMode;
+    setIsDarkMode(newVal);
+    if (typeof chrome !== 'undefined' && chrome.storage) {
+      chrome.storage.local.set({ isDarkMode: newVal });
+    }
+  };
+
+  const handleClose = () => {
+    window.parent.postMessage({ action: 'CLOSE_POPUP' }, '*');
+  };
+
+  const handleGeneratePDF = async () => {
+    setIsGenerating(true);
+    setStatus('generating');
+
+    try {
+      // Tell background worker to open the preview page
+      chrome.runtime.sendMessage({ action: 'OPEN_PREVIEW' });
+      
+      setStatus('done');
+
+      setTimeout(() => {
+        setStatus('idle');
+        handleClose(); // Close the floating widget
+      }, 1000);
+    } catch (err) {
+      console.error('Failed to open preview:', err);
+      setStatus('error');
+      setTimeout(() => setStatus('idle'), 3000);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const buttonLabel = {
+    idle: 'Preview & Export',
+    generating: 'Opening...',
+    done: '✓ Opened!',
+    error: '✕ Failed, try again',
+  }[status];
+
+  return (
+    <div className="w-[360px] mx-auto bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden font-['Inter',system-ui,sans-serif]">
+      {/* Header */}
+      <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+        <div className="flex items-center gap-2">
+          <img src="logo1.png" alt="Logo" className="w-4 h-4 rounded" />
+          <span className="text-base font-bold text-blue-600">AI Exporter</span>
+          {chatData.platform && (
+            <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">{platformLabel}</span>
+          )}
+        </div>
+        <button onClick={handleClose} className="w-7 h-7 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Preview */}
+      <div className="px-5 pt-4 pb-3">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Preview</span>
+          <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-md">A4 Document</span>
+        </div>
+
+        {/* Document */}
+        <div className={`rounded-xl p-4 flex justify-center transition-colors ${isDarkMode ? 'bg-slate-900' : 'bg-slate-50'}`}>
+          <div 
+            className={`w-48 rounded-lg shadow-md border overflow-hidden relative transition-colors ${isDarkMode ? 'bg-[#131314] border-gray-800' : 'bg-white border-slate-200'}`}
+            style={{ height: '272px' }}
+          >
+            
+            <iframe 
+              src={chrome.runtime?.getURL('index.html?mini=true#/preview') || ''} 
+              style={{ 
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '794px', 
+                height: '1123px', 
+                transform: 'scale(0.2418)', 
+                transformOrigin: 'top left', 
+                pointerEvents: 'none', 
+                border: 'none',
+                maxWidth: 'none',
+                maxHeight: 'none'
+              }}
+              title="PDF Preview"
+            />
+
+            <div className={`absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t ${isDarkMode ? 'from-[#131314] to-transparent' : 'from-white to-transparent'}`} />
+          </div>
+        </div>
+      </div>
+
+      <div className="px-5 pt-2 pb-4">
+        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Export Settings</span>
+        <div className="mt-3 bg-slate-50 rounded-xl p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+              </div>
+              <span className="text-sm font-medium text-slate-700">Dark Mode</span>
+            </div>
+            <button
+              onClick={toggleTheme}
+              className={`w-11 h-6 rounded-full transition-colors relative ${isDarkMode ? 'bg-blue-500' : 'bg-slate-300'}`}
+            >
+              <div className={`w-5 h-5 bg-white rounded-full shadow absolute top-0.5 transition-transform ${isDarkMode ? 'translate-x-[22px]' : 'translate-x-0.5'}`} />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Generate Button */}
+      <div className="px-5 pb-4">
+        <button
+          onClick={handleGeneratePDF}
+          disabled={isGenerating}
+          className={`w-full font-semibold py-3.5 rounded-xl flex items-center justify-center gap-2 shadow-lg transition-all active:scale-[0.98] text-sm
+            ${status === 'done'
+              ? 'bg-green-500 hover:bg-green-600 text-white shadow-green-500/25'
+              : status === 'error'
+                ? 'bg-red-500 hover:bg-red-600 text-white shadow-red-500/25'
+                : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-600/25'
+            }
+            ${isGenerating ? 'opacity-75 cursor-not-allowed' : ''}
+          `}
+        >
+          {status === 'generating' ? (
+            <svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10" strokeOpacity="0.3" />
+              <path d="M12 2a10 10 0 0 1 10 10" />
+            </svg>
+          ) : (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+            </svg>
+          )}
+          {buttonLabel}
+        </button>
+      </div>
+
+      {/* Footer */}
+      <div className="px-5 py-3 border-t border-slate-100 flex items-center justify-between">
+        <span className="text-[10px] text-slate-400 font-medium tracking-wide">S LAB EDITION 1.1</span>
+        <div className="flex items-center gap-4">
+          <a href="#" className="text-[10px] text-slate-400 font-semibold hover:text-slate-600 uppercase tracking-wider">Help</a>
+          <a href="#" className="text-[10px] text-slate-400 font-semibold hover:text-slate-600 uppercase tracking-wider">Settings</a>
+        </div>
+      </div>
+    </div>
+  );
+}
