@@ -60,8 +60,7 @@ Save your valuable research, coding sessions, and creative brainstorms with a si
 1. Navigate to a chat on any supported AI platform (e.g., chatgpt.com, gemini.google.com).
 2. Click the **AI Chat Exporter** extension icon in your browser's toolbar.
 3. Click the export button to instantly generate and download your formatted PDF
-![Image 1](./images/image1.png)
-![Image 2](./images/image2.png)
+
 ![Image 3](./images/image3.png)
 ![Image 4](./images/image4.png)
 ![Image 5](./images/image5.png)
