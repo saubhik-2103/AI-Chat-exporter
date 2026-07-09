@@ -56,7 +56,7 @@ Save your valuable research, coding sessions, and creative brainstorms with a si
 5. **Load into your Browser (Chrome):**
    - Navigate to `chrome://extensions/` in your browser.
    - Enable **Developer mode** in the top right corner.
-   - Click **Load unpacked** and select the `dist` folder generated after building.
+   - Click **Load unpacked** and select the `extension` folder downloaded after unzipping.
 
 ## 💡 How to Use
 
